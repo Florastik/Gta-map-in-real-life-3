@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        #map {
+            height: 100vh;
+            width: 100%;
+        }
+        .leaflet-tile-pane img {
+            filter: blur(5px); /* Apply a blur effect to the map tiles */
+        }
+        .leaflet-container .leaflet-tile {
+            transition: filter 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        const map = L.map('map').setView([51.505, -0.09], 13);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 18,
+            attribution: 'Map data © OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Create a blur effect for the map
+        const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        tileLayer.on('load', function() {
+            setTimeout(() => {
+                tileLayer.getContainer().style.filter = 'blur(5px)';
+            }, 1000);
+        });
+
+        // Add a marker to track the user
+        const userMarker = L.marker([51.505, -0.09]).addTo(map);
+
+        // Enable geolocation tracking
+        if (navigator.geolocation) {
+            navigator.geolocation.watchPosition(position => {
+                const { latitude, longitude } = position.coords;
+                userMarker.setLatLng([latitude, longitude]);
+                map.setView([latitude, longitude], 13);
+                
+                // Clear the blur effect when near the user
+                tileLayer.getContainer().style.filter = 'none';
+            });
+        } else {
+            alert('Geolocation is not supported by this browser.');
+        }
+    </script>
+</body>
+</html>
